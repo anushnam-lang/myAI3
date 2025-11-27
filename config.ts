@@ -30,7 +30,7 @@ function getDateAndTime(): string {
 
 export const DATE_AND_TIME = getDateAndTime();
 
-export const AI_NAME = "BookRecomm";
+export const AI_NAME = "LitLens";
 export const OWNER_NAME = "GoodDeeds";
 
 export const WELCOME_MESSAGE = `Hi there! I’m ${AI_NAME}, your personal book-picking buddy from ${OWNER_NAME}. Tell me what you like, and I’ll find your next great read!`
@@ -52,5 +52,5 @@ export const MODERATION_DENIAL_MESSAGE_VIOLENCE = "I can't discuss violent conte
 export const MODERATION_DENIAL_MESSAGE_VIOLENCE_GRAPHIC = "I can't discuss graphic violent content. Please ask something else.";
 export const MODERATION_DENIAL_MESSAGE_DEFAULT = "Your message violates our guidelines. I can't answer that.";
 
-export const PINECONE_TOP_K = 40;
+export const PINECONE_TOP_K = 10;
 export const PINECONE_INDEX_NAME = "my-ai";

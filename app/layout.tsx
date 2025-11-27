@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MyAI3",
-  description: "MyAI3",
+  title: "LitLens: Your AI Reading Recommender",
+  description: "LitLens is an AI chatbot that provides personalized book recommendations based on user requests, powered by Goodreads data.",
 };
 
 export default function RootLayout({

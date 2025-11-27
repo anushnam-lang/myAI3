@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
-import { ArrowUp, Eraser, Loader2, Plus, PlusIcon, Square } from "lucide-react";
+import { ArrowUp, Eraser, Loader2, Square } from "lucide-react"; 
 import { MessageWall } from "@/components/messages/message-wall";
 import { ChatHeader } from "@/app/parts/chat-header";
 import { ChatHeaderBlock } from "@/app/parts/chat-header";
@@ -127,48 +127,71 @@ export default function Chat() {
     form.reset();
   }
 
-  function clearChat() {
-    const newMessages: UIMessage[] = [];
+function clearChat() {
+    // 1. Define the Welcome Message
+    const welcomeMessage: UIMessage = {
+      id: `welcome-${Date.now()}`,
+      role: "assistant",
+      parts: [
+        {
+          type: "text",
+          // Use your WELCOME_MESSAGE constant
+          text: WELCOME_MESSAGE,
+        },
+      ],
+    };
+    const newMessages: UIMessage[] = [welcomeMessage];
     const newDurations = {};
+    // 2. Update state to show the welcome message
     setMessages(newMessages);
     setDurations(newDurations);
+    // 3. Update localStorage so the message persists after refresh
     saveMessagesToStorage(newMessages, newDurations);
+    // Optional: Reset the ref to allow the initial welcome message logic to run 
+    // again if the component were to be unmounted and remounted without a full page refresh
+    // Though not strictly necessary with the fix above, it ensures consistency.
+    welcomeMessageShownRef.current = true; 
     toast.success("Chat cleared");
   }
 
   return (
-    <div className="flex h-screen items-center justify-center font-sans dark:bg-black">
-      <main className="w-full dark:bg-black h-screen relative">
-        <div className="fixed top-0 left-0 right-0 z-50 bg-linear-to-b from-background via-background/50 to-transparent dark:bg-black overflow-visible pb-16">
+    // Ensure main container is fully dark
+    <div className="flex h-screen items-center justify-center font-sans bg-background">
+      <main className="w-full bg-background h-screen relative">
+        {/* Header: Solid background, no fade/transparency */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-background overflow-visible pb-4 shadow-sm">
           <div className="relative overflow-visible">
             <ChatHeader>
-              <ChatHeaderBlock />
+              <ChatHeaderBlock className="justify-start">
+                  <Avatar
+                    className="size-8 ring-1 ring-primary"
+                  >
+                    <AvatarImage src="/logo.png" />
+                    <AvatarFallback>
+                      <Image src="/logo.png" alt="Logo" width={50} height={50} />
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="ml-3 text-2xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500">{AI_NAME}</p>
+              </ChatHeaderBlock>
               <ChatHeaderBlock className="justify-center items-center">
-                <Avatar
-                  className="size-8 ring-1 ring-primary"
-                >
-                  <AvatarImage src="/logo.png" />
-                  <AvatarFallback>
-                    <Image src="/logo.png" alt="Logo" width={36} height={36} />
-                  </AvatarFallback>
-                </Avatar>
-                <p className="tracking-tight">Chat with {AI_NAME}</p>
               </ChatHeaderBlock>
               <ChatHeaderBlock className="justify-end">
                 <Button
+                  // Use primary color for 'New Chat' button text/icon
                   variant="outline"
                   size="sm"
-                  className="cursor-pointer"
+                  className="cursor-pointer border-primary text-primary hover:bg-primary/5"
                   onClick={clearChat}
                 >
-                  <Plus className="size-4" />
+                  <Eraser className="size-4 mr-1" />
                   {CLEAR_CHAT_TEXT}
                 </Button>
               </ChatHeaderBlock>
             </ChatHeader>
           </div>
         </div>
-        <div className="h-screen overflow-y-auto px-5 py-4 w-full pt-[88px] pb-[150px]">
+        {/* Chat Wall: Use solid background class */}
+        <div className="h-screen overflow-y-auto px-5 py-4 w-full pt-[88px] pb-[150px] chat-wall-container">
           <div className="flex flex-col items-center justify-end min-h-full">
             {isClient ? (
               <>
@@ -186,9 +209,10 @@ export default function Chat() {
             )}
           </div>
         </div>
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-linear-to-t from-background via-background/50 to-transparent dark:bg-black overflow-visible pt-13">
-          <div className="w-full px-5 pt-5 pb-1 items-center flex justify-center relative overflow-visible">
-            <div className="message-fade-overlay" />
+        {/* Footer/Input Area: Solid background, no fade/transparency, and dark color */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background overflow-visible pt-5 shadow-lg">
+          <div className="w-full px-5 pt-0 pb-1 items-center flex justify-center relative overflow-visible">
+            {/* Removed message-fade-overlay class here */}
             <div className="max-w-3xl w-full">
               <form id="chat-form" onSubmit={form.handleSubmit(onSubmit)}>
                 <FieldGroup>
@@ -204,8 +228,9 @@ export default function Chat() {
                           <Input
                             {...field}
                             id="chat-form-message"
-                            className="h-15 pr-15 pl-5 bg-card rounded-[20px]"
-                            placeholder="Type your message here..."
+                            // Input now uses bg-input (dark gray) and rounded-[25px]
+                            className="h-15 pr-15 pl-5 bg-purple-600 border-border rounded-[25px] placeholder:text-white" 
+                            placeholder="Recommend me a fantasy novel, or a biography..."
                             disabled={status === "streaming"}
                             aria-invalid={fieldState.invalid}
                             autoComplete="off"
@@ -218,12 +243,13 @@ export default function Chat() {
                           />
                           {(status == "ready" || status == "error") && (
                             <Button
-                              className="absolute right-3 top-3 rounded-full"
+                              // Send button uses solid primary color (magenta/purple)
+                              className="absolute right-3 top-3 rounded-full bg-black hover:bg-gray-800"
                               type="submit"
                               disabled={!field.value.trim()}
                               size="icon"
                             >
-                              <ArrowUp className="size-4" />
+                              <ArrowUp className="size-4 text-white" />
                             </Button>
                           )}
                           {(status == "streaming" || status == "submitted") && (
@@ -250,6 +276,6 @@ export default function Chat() {
           </div>
         </div>
       </main>
-    </div >
+    </div>
   );
 }
